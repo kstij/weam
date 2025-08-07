@@ -2,6 +2,12 @@ const brainService = require('../../services/brain');
 
 const BRAIN = 'brain';
 
+const isAuthorizedForBulkDelete = (req) => {
+  // Only allow users with 'admin' or 'superadmin' roles to perform bulk delete
+  // Adjust role names as per your application's role definitions
+  return req.user && (req.user.role === 'admin' || req.user.role === 'superadmin');
+};
+
 const createBrain = catchAsync(async (req, res) => {
     const result = await brainService.createBrain(req);
     if (result) {
@@ -39,6 +45,9 @@ const deleteBrain = catchAsync(async (req, res) => {
 })
 
 const deleteAllBrain = catchAsync(async (req, res) => {
+    if (!isAuthorizedForBulkDelete(req)) {
+        return util.failureResponse(_localize('module.unauthorized', req, BRAIN), res, 403);
+    }
     const result = await brainService.deleteAllBrain(req);
     if (result) {
         res.message = _localize('module.delete', req, BRAIN);
