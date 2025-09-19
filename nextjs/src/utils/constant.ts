@@ -118,7 +118,6 @@ export const MODULE_ACTIONS = {
     REFRESH_TOKEN: 'refreshToken',
     ASSIGN_GPT: 'assigngpt',
     TOGGLE: 'toggle',
-    GET_SUBSCRIPTION_STATUS: 'getSubscriptionStatus',
     CHAT_TEAM_DELETE:'chatTeamDelete',
     UPCOMING_INVOICE:'upcomingInvoice',
     UPGRADE_SUBSCRIPTION:'upgradeSubscription',
@@ -163,7 +162,8 @@ export const MODULE_ACTIONS = {
     PAGE_UPDATE: 'pageUpdate',
     PAGE_DELETE: 'deletePage',
     GET_ALL_PAGES: 'getAllPages',
-    SOLUTION_INSTALL: 'solutionInstall'
+    SOLUTION_INSTALL: 'solutionInstall',
+    ENHANCE_PROMPT_BY_LLM: 'enhancePromptByLLM',
 
 } as const;
 
@@ -335,6 +335,7 @@ export const SOCKET_EVENTS = {
     PRIVATE_BRAIN_OFF: 'privatebrainoff',
     FETCH_SUBSCRIPTION: 'fetchsubscription',
     LLM_RESPONSE_SEND: 'llmresponsesend',
+    GENERATE_TITLE_BY_LLM: 'generatetitlebyllm',
 }
 
 export const THREAD_MESSAGE_TYPE = {
@@ -434,6 +435,12 @@ export const GPT_MODELS = [
 
 //Update this constant when add/remove any new modal and can set sequence of models using this constant
 export const AI_MODAL_NAME = {
+    // GPT-5 models (moved to first for priority in chat dropdown)
+    GPT_5: 'gpt-5',
+    GPT_5_MINI: 'gpt-5-mini',
+    GPT_5_NANO: 'gpt-5-nano',
+    GPT_5_CHAT: 'gpt-5-chat-latest',    
+    
     // Open AI models
     GPT_4_1: 'gpt-4.1',
     GPT_4_O_LATEST: 'chatgpt-4o-latest',
@@ -441,12 +448,12 @@ export const AI_MODAL_NAME = {
     GPT_4_1_NANO: 'gpt-4.1-nano',
     O4_MINI: 'o4-mini',
     GPT_O3: 'o3',
-    GPT_4_1_SEARCH_MEDIUM: 'gpt-4.1-search-medium',    
+    GPT_4_1_SEARCH_MEDIUM: 'gpt-4.1-search-medium',
 
     // Gemini models
-    GEMINI_2_5_FLASH_PREVIEW_04_17: 'gemini-2.5-flash-preview-04-17',
     GEMINI_2_5_PRO_PREVIEW_05_06: 'gemini-2.5-pro-preview-05-06',
     GEMINI_2_0_FLASH: 'gemini-2.0-flash',
+    GEMINI_2_5_FLASH_PREVIEW_05_20: 'gemini-2.5-flash-preview-05-20',
 
     // Anthropic models
     //CLAUDE_3_7_SONNET_LATEST: 'claude-3-7-sonnet-latest',
@@ -556,6 +563,55 @@ export const MODAL_NAME_CONVERSION = {
 }
 
 export const MODEL_CREDIT_INFO = [
+    // GPT-5 models (moved to first for priority in chat dropdown)
+    {
+        code: 'OPEN_AI',
+        model: 'gpt-5',
+        credit: 10,
+        displayName: 'GPT-5',
+        snippet: 'Complex coding and analysis with advanced reasoning capabilities.',
+        doc: true,
+        websearch: false,
+        vision: true,
+        image: true,
+        reasoning: true,
+    },
+    {
+        code: 'OPEN_AI',
+        model: 'gpt-5-mini',
+        credit: 2,
+        displayName: 'GPT-5 Mini',
+        snippet: 'Fast responses, summaries, and general tasks with good reasoning.',
+        doc: true,
+        websearch: false,
+        vision: true,
+        image: true,
+        reasoning: true,
+    },
+    {
+        code: 'OPEN_AI',
+        model: 'gpt-5-nano',
+        credit: 5,
+        displayName: 'GPT-5 Nano',
+        snippet: 'Instant Q&A and classification tasks.',
+        doc: true,
+        websearch: false,
+        vision: true,
+        image: true,
+        reasoning: true,
+    },
+    {
+        code: 'OPEN_AI',
+        model: 'gpt-5-chat-latest',
+        credit: 10,
+        displayName: 'GPT-5 Chat',
+        snippet: 'Model used in ChatGPT with latest capabilities.',
+        doc: true,
+        websearch: false,
+        vision: true,
+        image: true,
+        reasoning: false,
+    },
     {
         code: 'OPEN_AI',
         model: 'gpt-4o-mini',
@@ -706,7 +762,7 @@ export const MODEL_CREDIT_INFO = [
     },
     {
         code: 'GEMINI',
-        model: 'gemini-2.5-flash-preview-04-17',
+        model: 'gemini-2.5-flash-preview-05-20',
         credit: 5,
         displayName: 'Gemini 2.5 Flash Preview',
         snippet: 'Fast with enhanced reasoning, great for content and mid-level coding.',
@@ -870,7 +926,7 @@ export const MODEL_CREDIT_INFO = [
         snippet: 'Great for content creation and coding.',
         doc: true,
         websearch: false,
-        vision: true, // chat with images
+        vision: false, // chat with images
         image: false, // image generation
         reasoning: false,
     },
@@ -1022,6 +1078,26 @@ export const AI_CREDITS = [
         MessageNo: '50',
     },
     {
+        modelName: 'OpenAI gpt-5',
+        creditCount: '10',
+        MessageNo: '50',
+    },
+    {
+        modelName: 'OpenAI gpt-5-mini',
+        creditCount: '2',
+        MessageNo: '250',
+    },
+    {
+        modelName: 'OpenAI gpt-5-nano',
+        creditCount: '5',
+        MessageNo: '100',
+    },
+    {
+        modelName: 'OpenAI gpt-5-chat-latest',
+        creditCount: '10',
+        MessageNo: '50',
+    },
+    {
         modelName: 'Gemini 2.0 Flash',
         creditCount: '0.5',
         MessageNo: '1000',
@@ -1162,6 +1238,26 @@ export const FREE_TIER_AI_CREDITS = [
     },
     {
         modelName: 'OpenAI chatgpt-4o-latest',
+        creditCount: '10',
+        MessageNo: '20',
+    },
+    {
+        modelName: 'OpenAI gpt-5',
+        creditCount: '10',
+        MessageNo: '20',
+    },
+    {
+        modelName: 'OpenAI gpt-5-mini',
+        creditCount: '2',
+        MessageNo: '100',
+    },
+    {
+        modelName: 'OpenAI gpt-5-nano',
+        creditCount: '5',
+        MessageNo: '40',
+    },
+    {
+        modelName: 'OpenAI gpt-5-chat-latest',
         creditCount: '10',
         MessageNo: '20',
     },
@@ -1325,15 +1421,19 @@ export const MODEL_NAME_BY_CODE = {
     'gpt-4-gizmo': 'OPEN_AI',
     'gpt-3.5-turbo': 'OPEN_AI',
     'gpt-4.1-search-medium': 'OPEN_AI',
+    'gpt-5': 'OPEN_AI',
+    'gpt-5-mini': 'OPEN_AI',
+    'gpt-5-nano': 'OPEN_AI',
+    'gpt-5-chat-latest': 'OPEN_AI',
     
     // Gemini models
-    'gemini-2.5-flash-preview-04-17': 'GEMINI',
     'gemini-2.5-pro-preview-05-06': 'GEMINI',
     'gemini-2.0-flash': 'GEMINI',
     'gemini-1.5-flash-8b': 'GEMINI',
     'gemini-1.5-pro': 'GEMINI',
     'gemini-1.5-flash': 'GEMINI',
     'gemini-2.5-pro-preview-03-25': 'GEMINI',
+    'gemini-2.5-flash-preview-05-20': 'GEMINI',
     
     // Anthropic models
     'claude-3-opus-latest': 'ANTHROPIC',
@@ -1410,4 +1510,5 @@ export const STREAMING_RESPONSE_STATUS = {
     DONE: '[DONE]',
     CITATION: '[CITATION]',
     WEB_SEARCH: '[WEB_SEARCH]',
+    IMAGE_GENERATION_START: '[IMAGE_GENERATION_TOOL]',
 }

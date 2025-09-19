@@ -20,6 +20,7 @@ import SupportIcon from '@/icons/SupportIcon';
 import SidebarFooter from './SidebarFooter';
 import SettingOptions from './SettingOptions';
 import DashboardIcon from '@/icons/DashboardIcon';
+import CreditControlIcon from '@/icons/CreditControlIcon';
 
 const BackButton = dynamic(() => import('./BackButton'), { ssr: false });
 const SettingsLink = dynamic(() => import('./SettingsLink'), { ssr: false });
