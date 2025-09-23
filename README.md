@@ -24,7 +24,7 @@
 
 ## What is Weam AI
 
-Weam is an open source platform that helps teams adopt AI systematically. It includes a complete, production-ready stack with Next.js frontend and Node.js/Python backend - ready to deploy and use immediately.
+Weam is an open source platform that helps teams adopt AI systematically. It includes a complete, production-ready stack with Next.js frontend and Node.js backend - ready to deploy and use immediately.
 
 **System Requirements:** CPU with 4+ cores, 8GB+ RAM. Professional installation support available for non-technical teams.  
 
