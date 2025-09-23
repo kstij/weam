@@ -4,15 +4,12 @@ import {
     MembersIcon,
     SettingsIcon,
 } from '@/icons/SettingsIcon';
-import SuperSolutionIcon from '@/icons/SuperSolutionIcon';
 import React from 'react';
 import { LINK } from '@/config/config';
 import { getSessionUser } from '@/utils/handleAuth';
 import { ROLE_TYPE } from '@/utils/constant';
 import { hasPermission, PERMISSIONS, Role } from '@/utils/permission';
-import { TemplateLibrary } from './SettingSelection';
 import ReportIcon from '@/icons/ReportIcon';
-import PrivateVisible from '../Brains/PrivateVisible';
 import dynamic from 'next/dynamic';
 import AppIcon from '@/icons/AppsIcon';
 import StorageIcon from '@/icons/StorageIcon';
