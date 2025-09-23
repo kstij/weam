@@ -148,7 +148,7 @@ cp .env.example .env
 bash build.sh (for mac/linux)
 or 
 bash winbuild.sh  (for windows)
-docker-compose up -d
+docker-compose up --build
 ```
 
 - Docs: [Quickstart Guide](https://docs.weam.ai/quickstart)
