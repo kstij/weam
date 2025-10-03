@@ -52,9 +52,13 @@ function getAnthropicMaxTokens(modelName) {
 const { createDallEImageTool } = require('./imageTool');
 const { initializeMCPClient, selectRelevantToolsWithDomainFilter } = require('./mcpService');
 const { z } = require('zod');
+// Import the custom Gemini image tool
+const { createGeminiImageTool } = require('./geminiImageTool');
 
 // Create the DALL-E image generation tool with default API key
 const imageGenerationTool = createDallEImageTool(LINK.WEAM_OPEN_AI_KEY);
+// Create the Gemini image generation tool with default API key
+const geminiImageTool = createGeminiImageTool();
 
 // Current time tool
 const currentTimeTool = tool(
@@ -85,13 +89,16 @@ const MODEL_CONFIGS = {
         supportsVision: true,
         imageFormats: ['base64'],
         formatImage: async (imageUrl) => {
-            const { base64, mimeType } = await convertImageToBase64(imageUrl);
+            const result= await convertImageToBase64(imageUrl);
+            if (!result) {
+                return null;
+            }
             return {
                 type: 'image',
                 source: {
                     type: 'base64',
-                    media_type: mimeType,
-                    data: base64
+                    media_type: result.mimeType,
+                    data: result.base64
                 }
             };
         }
@@ -100,11 +107,14 @@ const MODEL_CONFIGS = {
         supportsVision: true,
         imageFormats: ['base64'],
         formatImage: async (imageUrl) => {
-            const { base64, mimeType } = await convertImageToBase64(imageUrl);
+            const result= await convertImageToBase64(imageUrl);
+            if (!result) {
+                return null;
+            }
             return {
                 type: 'image_url',
                 image_url: {
-                    url: `data:${mimeType};base64,${base64}`
+                    url: `data:${result.mimeType};base64,${result.base64}`
                 }
             };
         }
@@ -259,6 +269,7 @@ function getToolExecutorMap(agentDetails = null, mcpTools = []) {
     const baseTools = {
         [webSearchTool.name]: webSearchTool,
         [imageGenerationTool.name]: imageGenerationTool,
+        [geminiImageTool.name]: geminiImageTool,
         [currentTimeTool.name]: currentTimeTool,
         ...Object.fromEntries(mcpTools.map(tool => [tool.name, tool]))
     };
@@ -462,6 +473,10 @@ async function callTool(state, agentDetails = null, userData = null) {
                 // For image generation tool, pass the API key from the query data
                 let toolArgs = toolCall.args;
                 if (toolCall.name === 'dalle_api_wrapper' && global.currentQueryData && global.currentQueryData.apiKey) {
+                    const decryptedApiKey = decryptedData(global.currentQueryData.apiKey);
+                    toolArgs = { ...toolCall.args, apiKey: decryptedApiKey };
+                }
+                if (toolCall.name === 'gemini_image_generator' && global.currentQueryData && global.currentQueryData.apiKey) {
                     const decryptedApiKey = decryptedData(global.currentQueryData.apiKey);
                     toolArgs = { ...toolCall.args, apiKey: decryptedApiKey };
                 }
@@ -681,8 +696,8 @@ async function llmFactory(modelName, opts = {}) {
                 }
             });
             
-            // chatgpt-4o-latest doesn't support tools, so don't bind them
-            if (modelName.toLowerCase().includes('chatgpt-4o-latest')) {
+            // chatgpt-4o-latest and gpt-5-chat-latest doesn't support tools, so don't bind them
+            if (modelName.toLowerCase().includes('chatgpt-4o-latest') || modelName.toLowerCase().includes('gpt-5-chat-latest')) {
                 if (!needsTools) {
                     simpleModelCache.set(cacheKey, openAIModel);
                 }
@@ -744,7 +759,7 @@ async function llmFactory(modelName, opts = {}) {
                 
                 // Only bind tools if query needs them
                 if (needsTools && (selectedTools.length > 0 || queryNeedsTools(opts.query))) {
-                    return geminiLLM.bindTools([webSearchTool, currentTimeTool, ...selectedTools]);
+                    return geminiLLM.bindTools([webSearchTool, geminiImageTool, currentTimeTool, ...selectedTools]);
                 }
                 
                 // Cache simple model for reuse
