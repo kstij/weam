@@ -2,6 +2,11 @@ const brainService = require('../../services/brain');
 
 const BRAIN = 'brain';
 
+function isAdmin(req) {
+  // Assumes req.user exists and has a role property
+  return req.user && req.user.role === 'admin';
+}
+
 const createBrain = catchAsync(async (req, res) => {
     const result = await brainService.createBrain(req);
     if (result) {
@@ -30,6 +35,9 @@ const deleteBrain = catchAsync(async (req, res) => {
 })
 
 const getAll = catchAsync(async (req, res) => {
+    if (!isAdmin(req)) {
+        return util.failureResponse(_localize('error.unauthorized', req), res, 403);
+    }
     const result = await brainService.getAll(req);
     if (result.data.length) {
         res.message = _localize('module.list', req, BRAIN);
